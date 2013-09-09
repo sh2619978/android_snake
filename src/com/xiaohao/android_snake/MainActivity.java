@@ -1,4 +1,6 @@
-package com.example.android_snake;
+package com.xiaohao.android_snake;
+
+import com.xiaohao.android_snake.R;
 
 import android.os.Bundle;
 import android.app.Activity;
