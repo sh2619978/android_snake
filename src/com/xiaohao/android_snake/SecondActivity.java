@@ -56,12 +56,14 @@ public class SecondActivity extends Activity {
         private Random random = new Random();
         private boolean gameover;
 
+        private boolean userHasTurn; // 玩家一次转向手势是否完成
+
         public static final int GAME_WIDTH = Body.SIZE * 12;
         public static final int GAME_HEIGHT = Body.SIZE * 20;
-        public static final int FLING_UP = 1;
-        public static final int FLING_DOWN = 2;
-        public static final int FLING_LEFT = 3;
-        public static final int FLING_RIGHT = 4;
+        public static final int GESTURE_UP = 1;
+        public static final int GESTURE_DOWN = 2;
+        public static final int GESTURE_LEFT = 3;
+        public static final int GESTURE_RIGHT = 4;
 
         public MyView(Context context) {
             super(context);
@@ -166,84 +168,113 @@ public class SecondActivity extends Activity {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             Log.e("xiaohao", "onFling");
+            Log.e("xiaohao", "velocityX: " + velocityX + ", velocityY: " + velocityY);
 
-            float x1 = e1.getRawX();
-            float y1 = e1.getRawY();
-            float x2 = e2.getRawX();
-            float y2 = e2.getRawY();
+            // float xd = velocityX;
+            // float yd = velocityY;
+            //
+            // int flingTurn = getGestureDirection(xd, yd);
+            //
+            // switch (flingTurn) {
+            // case GESTURE_RIGHT:
+            // snake.turn(Snake.RIGHT);
+            // break;
+            // case GESTURE_DOWN:
+            // snake.turn(Snake.DOWN);
+            // break;
+            // case GESTURE_LEFT:
+            // snake.turn(Snake.LEFT);
+            // break;
+            // case GESTURE_UP:
+            // snake.turn(Snake.UP);
+            // break;
+            // default:
+            // break;
+            // }
+            return true;
+        }
 
-            Log.e("xiaohao", x1 + "," + y1 + " --> " + x2 + "," + y2);
-
-            float xd = x2 - x1;
-            float yd = y2 - y1;
-
+        private int getGestureDirection(float xd, float yd) {
             if (Math.abs(xd) > Math.abs(yd)) {
                 yd = 0f;
             } else if (Math.abs(xd) < Math.abs(yd)) {
                 xd = 0f;
             }
 
-            int flingTurn = -1;
-
             if (yd == 0) {
                 if (xd > 0) {
-                    flingTurn = FLING_RIGHT;
                     Log.e("xiaohao", "右");
+                    return GESTURE_RIGHT;
                 } else if (xd < 0) {
-                    flingTurn = FLING_LEFT;
                     Log.e("xiaohao", "左");
+                    return GESTURE_LEFT;
                 }
             } else if (xd == 0) {
                 if (yd > 0) {
-                    flingTurn = FLING_DOWN;
                     Log.e("xiaohao", "下");
+                    return GESTURE_DOWN;
                 } else if (yd < 0) {
-                    flingTurn = FLING_UP;
                     Log.e("xiaohao", "上");
+                    return GESTURE_UP;
                 }
             }
-
-            switch (flingTurn) {
-            case FLING_RIGHT:
-                snake.turn(Snake.RIGHT);
-                break;
-            case FLING_DOWN:
-                snake.turn(Snake.DOWN);
-                break;
-            case FLING_LEFT:
-                snake.turn(Snake.LEFT);
-                break;
-            case FLING_UP:
-                snake.turn(Snake.UP);
-                break;
-            default:
-                break;
-            }
-            return true;
+            return -1;
         }
 
         @Override
         public void onLongPress(MotionEvent e) {
-            // TODO Auto-generated method stub
-
+            Log.e("xiaohao", "onLongPress");
         }
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             Log.e("xiaohao", "onScroll");
+            Log.e("xiaohao", "e1.getRawX(): " + e1.getRawX() + ", e1.getRawY(): " + e1.getRawY());
+            Log.e("xiaohao", "e2.getRawX(): " + e2.getRawX() + ", e2.getRawY(): " + e2.getRawY());
+
+            float x1 = e1.getRawX();
+            float y1 = e1.getRawY();
+            float x2 = e2.getRawX();
+            float y2 = e2.getRawY();
+
+            float xd = x2 - x1;
+            float yd = y2 - y1;
+            if (xd < 10 && yd < 10) {
+                return true;
+            }
+
+            int scrollTurn = getGestureDirection(xd, yd);
+
+            switch (scrollTurn) {
+            case GESTURE_RIGHT:
+                snake.turn(Snake.RIGHT);
+                break;
+            case GESTURE_DOWN:
+                snake.turn(Snake.DOWN);
+                break;
+            case GESTURE_LEFT:
+                snake.turn(Snake.LEFT);
+                break;
+            case GESTURE_UP:
+                snake.turn(Snake.UP);
+                break;
+            default:
+                break;
+            }
+
             return true;
         }
 
         @Override
         public void onShowPress(MotionEvent e) {
-            // TODO Auto-generated method stub
+            Log.e("xiaohao", "onShowPress");
 
         }
 
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
-            // TODO Auto-generated method stub
-            return false;
+            Log.e("xiaohao", "onSingleTapUp");
+            return true;
         }
     }
 
