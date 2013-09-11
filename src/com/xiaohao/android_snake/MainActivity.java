@@ -22,14 +22,16 @@ public class MainActivity extends Activity {
         String[] projection = new String[] { MediaStore.Video.Media.DATA };
         Cursor cursor = contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null,
                 MediaStore.Video.Media.DEFAULT_SORT_ORDER);
-        cursor.moveToFirst();
-        int fileNum = cursor.getCount();
-        String videoPath = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA));
-        cursor.close();
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            int fileNum = cursor.getCount();
+            String videoPath = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA));
+            cursor.close();
 
-        VideoView videoView = (VideoView) findViewById(R.id.videoView);
-        videoView.setVideoPath(videoPath);
-        videoView.start();
+            VideoView videoView = (VideoView) findViewById(R.id.videoView);
+            videoView.setVideoPath(videoPath);
+            videoView.start();
+        }
     }
 
     @Override
