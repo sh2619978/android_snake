@@ -1,7 +1,6 @@
 package com.xiaohao.android_snake.snake;
 
 import java.util.ArrayList;
-import java.util.Timer;
 
 import android.graphics.Canvas;
 
@@ -9,9 +8,9 @@ import com.xiaohao.android_snake.SecondActivity;
 
 public class Snake {
     private ArrayList<Body> bodyList; // 定义数组列表存储Body类，即整个蛇
-    private Timer timer; // 定时器，同MainFrame中的timer
+    private Thread timer; // 定时器，同MainFrame中的timer
     private boolean speedup; // 定义布尔类型，表示蛇是否处于加速状态
-    private int delay;
+    private int period = SPEED;
     private static final int INIT_SIZE = 3; // 定义蛇初始长度
     public static final int UP = 1; // 定义向上常量
     public static final int RIGHT = 2; // 定义向右常量
@@ -78,12 +77,9 @@ public class Snake {
     // 根据指定方向来设置头方块的运动方向，如果是同方向则进行加速
     public void turn(int forward) {
         int currentForward = getHead().getForward();
-        if (currentForward == forward) // 同方向进行加速
-        {
-            delay = SPEED_UP;
+        if (currentForward == forward) {// 同方向进行加速
             setSpeedup(true);
-        } else if (Math.abs(currentForward - forward) != 2) // 不同方向则拐弯
-        {
+        } else if (Math.abs(currentForward - forward) != 2) { // 不同方向则拐弯
             getHead().setForward(forward);
         }
         // 相反方向则不进行任何改变，因为不能倒退
@@ -158,11 +154,11 @@ public class Snake {
         this.bodyList = bodyList;
     }
 
-    public Timer getTimer() {
+    public Thread getTimer() {
         return timer;
     }
 
-    public void setTimer(Timer timer) {
+    public void setTimer(Thread timer) {
         this.timer = timer;
     }
 
@@ -184,8 +180,12 @@ public class Snake {
         this.speedup = speedup;
     }
 
-    public int getDelay() {
-        return delay;
+    public int getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(int period) {
+        this.period = period;
     }
 
     public void draw(Canvas canvas) {

@@ -1,8 +1,6 @@
 package com.xiaohao.android_snake;
 
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import android.app.Activity;
 import android.content.Context;
@@ -52,11 +50,11 @@ public class SecondActivity extends Activity {
 
         private Snake snake; // 创建蛇的引用
         private Body food; // 创建食物的引用
-        private Timer timer; // 定义一个定时器，用来控制蛇和食物的绘画
+        private Thread timer; // 定义一个定时器，用来控制蛇和食物的绘画
         private Random random = new Random();
-        private boolean gameover;
+        private volatile boolean gameover;
 
-        private boolean userHasTurn; // 玩家一次转向手势是否完成
+        private volatile boolean userHasTurn; // 玩家一次转向手势是否完成
 
         public static final int GAME_WIDTH = Body.SIZE * 12;
         public static final int GAME_HEIGHT = Body.SIZE * 20;
@@ -73,8 +71,6 @@ public class SecondActivity extends Activity {
             gestureDetector = new GestureDetector(context, this);
 
             snake = new Snake();
-            timer = new Timer();
-            snake.setTimer(timer);
             snake.init();
 
             food = new Body();
@@ -95,7 +91,15 @@ public class SecondActivity extends Activity {
         @Override
         public boolean onTouchEvent(MotionEvent event) {
             Log.e("xiaohao", "onTouchEvent");
-            return gestureDetector.onTouchEvent(event);
+
+            boolean result = gestureDetector.onTouchEvent(event);
+            if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+                userHasTurn = false;
+
+                snake.setSpeedup(false);
+                snake.setPeriod(Snake.SPEED);
+            }
+            return result;
         }
 
         public void drawOnce() {
@@ -122,31 +126,39 @@ public class SecondActivity extends Activity {
 
             drawOnce();
 
-            timer.schedule(new TimerTask() {
+            timer = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    Log.e("xiaohao", "timer draw");
+                    while (true) {
+                        Log.e("xiaohao", "timer draw");
 
-                    if (snake.isEating(food)) {
-                        snake.addBody(food);
-                        food = new Body();
-                        randomPosition(food);
-                    } else {
-                        snake.run();
-                        if (snake.isHittingSelf()) {
-                            timer.cancel();
-                            gameover = true;
-                            return;
+                        if (snake.isEating(food)) {
+                            snake.addBody(food);
+                            food = new Body();
+                            randomPosition(food);
+                        } else {
+                            snake.run();
+                            if (snake.isHittingSelf()) {
+                                gameover = true;
+                                break;
+                            }
+                            if (snake.isHittingWall()) {
+                                gameover = true;
+                                break;
+                            }
                         }
-                        if (snake.isHittingWall()) {
-                            timer.cancel();
-                            gameover = true;
-                            return;
+                        drawOnce();
+
+                        try {
+                            Thread.sleep(snake.getPeriod());
+                        } catch (InterruptedException e) {
+
                         }
                     }
-                    drawOnce();
                 }
-            }, 1000, Snake.SPEED);
+            });
+            timer.start();
+            snake.setTimer(timer);
         }
 
         @Override
@@ -156,7 +168,7 @@ public class SecondActivity extends Activity {
 
         @Override
         public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-            timer.cancel();
+            timer.interrupt();
         }
 
         @Override
@@ -224,6 +236,8 @@ public class SecondActivity extends Activity {
         @Override
         public void onLongPress(MotionEvent e) {
             Log.e("xiaohao", "onLongPress");
+            snake.setSpeedup(true);
+            snake.setPeriod(Snake.SPEED_UP);
         }
 
         @Override
@@ -232,6 +246,10 @@ public class SecondActivity extends Activity {
             Log.e("xiaohao", "e1.getRawX(): " + e1.getRawX() + ", e1.getRawY(): " + e1.getRawY());
             Log.e("xiaohao", "e2.getRawX(): " + e2.getRawX() + ", e2.getRawY(): " + e2.getRawY());
 
+            if (userHasTurn) {
+                return true;
+            }
+
             float x1 = e1.getRawX();
             float y1 = e1.getRawY();
             float x2 = e2.getRawX();
@@ -239,11 +257,14 @@ public class SecondActivity extends Activity {
 
             float xd = x2 - x1;
             float yd = y2 - y1;
-            if (xd < 10 && yd < 10) {
+            if (Math.abs(xd) < 5 && Math.abs(yd) < 5) {
                 return true;
             }
 
             int scrollTurn = getGestureDirection(xd, yd);
+            if (scrollTurn != -1) {
+                userHasTurn = true;
+            }
 
             switch (scrollTurn) {
             case GESTURE_RIGHT:
