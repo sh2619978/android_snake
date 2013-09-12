@@ -114,14 +114,18 @@ public class SecondActivity extends Activity {
 
         @Override
         public void surfaceCreated(SurfaceHolder surfaceHolder) {
-            Canvas canvas = surfaceHolder.lockCanvas(new Rect(0, 0, GAME_WIDTH + 10, GAME_HEIGHT + 10));
+//            int playWidth = getResources().getDimensionPixelSize(R.dimen.snake_play_width);
+//            int playHeight = getResources().getDimensionPixelSize(R.dimen.snake_play_height);
+            int playWidth = GAME_WIDTH;
+            int playHeight = GAME_HEIGHT;
+            Canvas canvas = surfaceHolder.lockCanvas(new Rect(0, 0, playWidth + 10, playHeight + 10));
             canvas.drawColor(Color.WHITE);
             Paint paint = new Paint();
             paint.setAntiAlias(true);
             paint.setColor(Color.RED);
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(3);
-            canvas.drawRect(0, 0, GAME_WIDTH, GAME_HEIGHT, paint);
+            canvas.drawRect(0, 0, playWidth, playHeight, paint);
             surfaceHolder.unlockCanvasAndPost(canvas);
 
             drawOnce();
